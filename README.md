@@ -1,14 +1,16 @@
 # Local Slideshow Generator
 
-I built the script with the help of Copilot to generate slideshows from my picture Gallery hosted on my NAS.
+I built the script with the help of Copilot to generate slideshows from my picture gallery hosted on my NAS.
 
 ## Why ?
-I'm perfectly satisfied with a network share to access my picture gallery. I tried a Digikam Container but it's heavy on my system, I have to access it via a browser, and the interface is not easy to use.
+I'm perfectly satisfied with a network share to access my picture gallery. I tried a Digikam Container and the interface is heavy for my use case.
+Paired with a Discord bot I have that runs command, I can easily generate slideshows with this script.
 
 ## Features
-* The script sorts the files using exiftool and falls back to the filename order if the metadata is missing.
+* Sort file with metadat via Exiftool. Falls back to file order
 * Downloads the music file from Youtube or uses a local file depending on the options you use
-* Music and video fades in at the beginning.
+* Music and video fades in and out at the beginning and the end.
+* Music volume is lower throughout the whole video if there are mp4 videos with audio.
 
 ## How to use ?
 >./slideshow-generator.sh [-d media_dir] [-f final_output] [-m music_file] [-r resolution] [-y youtube_url] [-t image_duration]
@@ -18,6 +20,7 @@ I'm perfectly satisfied with a network share to access my picture gallery. I tri
 * -m : your music file location. If used with -y, it will download the file on that location an overwrite existing file. Optional if you use -y
 * -r : Target resolution
 * -t : The duration an picture stays on screen.
+* -y : A youtube link to a video
 
 ## Requirements
 * ffmpeg
@@ -27,9 +30,8 @@ I'm perfectly satisfied with a network share to access my picture gallery. I tri
 * bc
 
 ## What's missing ? 
-* The audio in  a video file seems to be overwritten, I haven't figured that out.
-* The fade out is missing
-* No transitions between pictures. I have no plan to add it as the complexity of the script will shoot up.
+* No transitions between pictures.
+* The music volume is not dynamic
 
 ## Sources
 According to Copilot, here is what it used to generate this script : 
