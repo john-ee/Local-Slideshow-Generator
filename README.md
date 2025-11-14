@@ -7,8 +7,9 @@ I'm perfectly satisfied with a network share to access my picture gallery. I tri
 Paired with a Discord bot I have that runs command, I can easily generate slideshows with this script.
 
 ## Features
-* Sort file with metadat via Exiftool. Falls back to file order
+* Sort file with metadata via Exiftool. Falls back to file order if some files are missing metadata.
 * Downloads the music file from Youtube or uses a local file depending on the options you use
+* Watermak the video with the Youtube URL if you use one.
 * Music and video fades in and out at the beginning and the end.
 * Music volume is lower throughout the whole video if there are mp4 videos with audio.
 
@@ -28,6 +29,7 @@ Paired with a Discord bot I have that runs command, I can easily generate slides
 * yt-dlp (optional if you use local files)
 * exiftool
 * bc
+* jq
 
 ## What's missing ? 
 * No transitions between pictures.

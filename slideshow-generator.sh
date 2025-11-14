@@ -30,10 +30,15 @@ for cmd in ffmpeg ffprobe exiftool bc; do
 done
 if [[ -n "$YOUTUBE_URL" ]]; then
  command -v yt-dlp >/dev/null 2>&1 || { echo "❌ yt-dlp is required"; exit 1; }
+ command -v jq >/dev/null 2>&1 || { echo "❌ jq is required"; exit 1; }
 fi
 
+# Download music and extract metadata if YouTube URL provided
 if [[ -n "$YOUTUBE_URL" ]]; then
+ echo "Downloading audio from YouTube..."
  yt-dlp -x --audio-format mp3 -o "$MUSIC_FILE" "$YOUTUBE_URL" || exit 1
+ YTID=$(yt-dlp --get-id "$YOUTUBE_URL")
+ echo "MUSIC CREDITS : https://youtu.be/$YTID" > overlay.txt
 fi
 
 mkdir -p "$SORTED_DIR" "$TMP_DIR"
@@ -47,14 +52,12 @@ for file in $(find "$SORTED_DIR" -type f \( -iname "*.jpg" -o -iname "*.mp4" \) 
   seg="$TMP_DIR/${base_name}.mp4"
 
   if [[ "$file" == *.jpg ]]; then
-    # Image → MP4 with silent audio
     ffmpeg -threads $THREADS -y \
       -f lavfi -i anullsrc=channel_layout=stereo:sample_rate=44100 \
       -loop 1 -t $DURATION_PER_IMAGE -i "$file" \
       -vf "scale=$RESOLUTION:force_original_aspect_ratio=decrease,pad=$RESOLUTION:(ow-iw)/2:(oh-ih)/2:black" \
       -r 30 -c:v libx264 -pix_fmt yuv420p -c:a aac -shortest "$seg" || exit 1
   else
-    # MP4 → normalized with audio preserved
     ffmpeg -threads $THREADS -y -i "$file" \
       -vf "scale=$RESOLUTION:force_original_aspect_ratio=decrease,pad=$RESOLUTION:(ow-iw)/2:(oh-ih)/2:black" \
       -r 30 -c:v libx264 -pix_fmt yuv420p -c:a aac -ar 44100 "$seg" || exit 1
@@ -80,16 +83,22 @@ DURATION=$(ffprobe -v error -show_entries format=duration -of csv=p=0 combined.m
 VIDEO_FADE_OUT_START=$(echo "$DURATION - $FADE_DUR" | bc)
 
 echo "Adding music and fades..."
-FILTER="[0:v]fade=t=in:st=0:d=$FADE_DUR,fade=t=out:st=$VIDEO_FADE_OUT_START:d=$FADE_DUR[v]; \
-[0:a]volume=1.0[a0]; \
-[1:a]volume=$MUSIC_VOL,afade=t=out:st=$VIDEO_FADE_OUT_START:d=$FADE_DUR[a1]; \
-[a0][a1]amix=inputs=2:duration=longest[a]"
-MAPS="-map [v] -map [a]"
+# Build video filter chain (fade + optional overlay)
+if [[ -n "$YOUTUBE_URL" ]]; then
+ DRAW_TEXT=",drawtext=textfile='overlay.txt':fontcolor=white:fontsize=20:x=w-tw-20:y=h-th-20:box=1:boxcolor=black@0.5"
+else
+ DRAW_TEXT=""
+fi
+
+VIDEO_FILTER="[0:v]fade=t=in:st=0:d=$FADE_DUR,fade=t=out:st=$VIDEO_FADE_OUT_START:d=$FADE_DUR$DRAW_TEXT[v]"
+AUDIO_FILTER="[0:a]volume=1.0[a0]; [1:a]volume=$MUSIC_VOL,afade=t=out:st=$VIDEO_FADE_OUT_START:d=$FADE_DUR[a1]; [a0][a1]amix=inputs=2:duration=longest[a]"
 
 ffmpeg -threads $THREADS -y -i combined.mp4 -i "$MUSIC_FILE" \
--filter_complex "$FILTER" $MAPS -c:v libx264 -c:a aac -t $DURATION "$FINAL_OUTPUT" || exit 1
+-filter_complex "$VIDEO_FILTER; $AUDIO_FILTER" \
+-map "[v]" -map "[a]" -c:v libx264 -c:a aac -t $DURATION "$FINAL_OUTPUT" || exit 1
 
+# Cleanup
 rm -rf "$TMP_DIR" "$TMP_LIST" combined.mp4 "$SORTED_DIR"
-if [[ -n "$YOUTUBE_URL" ]]; then rm -f "$MUSIC_FILE"; fi
+if [[ -n "$YOUTUBE_URL" ]]; then rm -f "$MUSIC_FILE" overlay.txt; fi
 
 echo "✅ Done! Final video: $FINAL_OUTPUT"
