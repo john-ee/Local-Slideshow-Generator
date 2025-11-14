@@ -1,1 +1,0 @@
-./slideshow-generator.sh  -d /DATA/Photos/Japan/Hike\ Around\ Nikko/ -f /dump/slideshow.mp4 -y "https://youtu.be/J9W1_GH3RFs?si=qXjJ8QL3Mzbkzl5s"
