@@ -1,0 +1,43 @@
+ Sources and References
+
+
+FFmpeg Documentation
+
+https://ffmpeg.org/ffmpeg-filters.html (for fade, amix, volume, scale, pad)
+https://ffmpeg.org/ffmpeg-formats.html#concat (for combining segments)
+https://ffmpeg.org/ffmpeg-filters.html#Audio-Filters (for anullsrc and volume)
+
+
+
+FFprobe Usage
+
+https://ffmpeg.org/ffprobe.html (for extracting duration and stream info)
+
+
+
+yt-dlp Documentation
+
+https://github.com/yt-dlp/yt-dlp (for downloading audio from YouTube)
+
+
+
+ExifTool Documentation
+
+https://exiftool.org/ (for renaming files by DateTimeOriginal)
+
+
+
+Shell Scripting Best Practices
+
+Using getopts for CLI options
+Error handling with || exit 1
+Sorting files with ls | sort for chronological order
+
+
+
+Community Examples
+
+FFmpeg forums and Stack Overflow threads on slideshow creation, audio mixing, and fade effects:
+
+https://stackoverflow.com/questions/tagged/ffmpeg
+https://trac.ffmpeg.org/wiki/Concatenate
